@@ -1,0 +1,2251 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Tugasan Murid Semasa Guru Bertugas Luar Stesen</title>
+  <style>
+    :root {
+      --navy: #0b2f5b;
+      --blue: #15599b;
+      --light-blue: #eaf3fb;
+      --yellow: #f7c948;
+      --orange: #d97706;
+      --ink: #172033;
+      --muted: #5b667a;
+      --line: #d8e1ec;
+      --paper: #ffffff;
+      --bg: #f4f7fb;
+      --shadow: 0 14px 34px rgba(11, 47, 91, 0.12);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", "Segoe UI", Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(21, 89, 155, 0.08) 0 25%, transparent 25% 100%),
+        linear-gradient(45deg, rgba(247, 201, 72, 0.13) 0 18%, transparent 18% 100%),
+        var(--bg);
+      line-height: 1.45;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      min-height: 100vh;
+    }
+
+    .site-header {
+      background:
+        linear-gradient(135deg, rgba(247, 201, 72, 0.14), transparent 28%),
+        linear-gradient(135deg, var(--navy), #123f73 72%, #0f3159);
+      color: #fff;
+      border-bottom: 6px solid var(--yellow);
+    }
+
+    .header-inner {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0;
+      display: grid;
+      grid-template-columns: 86px 1fr;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .school-badge {
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      background: #fff;
+      padding: 8px;
+      object-fit: contain;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+      transition: transform 0.28s ease, box-shadow 0.28s ease;
+    }
+
+    .school-badge:hover {
+      transform: translateY(-3px) rotate(-2deg);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+    }
+
+    .school-name {
+      margin: 0 0 6px;
+      font-size: clamp(1.25rem, 2.3vw, 2rem);
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .system-title {
+      margin: 0;
+      font-size: clamp(1rem, 1.7vw, 1.45rem);
+      font-weight: 700;
+      color: #f9fbff;
+    }
+
+    .header-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .meta-pill {
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      background: rgba(255, 255, 255, 0.11);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 0.92rem;
+      color: #fff;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 42px;
+    }
+
+    .notice,
+    .substitute-note {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-left: 6px solid var(--yellow);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+
+    .notice h2,
+    .substitute-note h2,
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+      color: var(--navy);
+    }
+
+    .notice p {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(140px, 1fr));
+      gap: 14px;
+      margin: 20px 0;
+    }
+
+    .summary-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      min-height: 104px;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      animation: fadeUp 0.42s ease both;
+    }
+
+    .summary-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(21, 89, 155, 0.45);
+      box-shadow: 0 18px 38px rgba(11, 47, 91, 0.16);
+    }
+
+    .summary-value {
+      display: block;
+      color: var(--navy);
+      font-size: 1.75rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .day-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .day-tab,
+    .action-btn,
+    .detail-btn,
+    .close-btn {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--navy);
+      min-height: 40px;
+      padding: 9px 13px;
+      font-weight: 700;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    }
+
+    .day-tab:hover,
+    .action-btn:hover,
+    .detail-btn:hover,
+    .close-btn:hover {
+      transform: translateY(-2px);
+      border-color: var(--blue);
+      background: var(--light-blue);
+      box-shadow: 0 8px 18px rgba(11, 47, 91, 0.12);
+    }
+
+    .day-tab.active,
+    .action-btn.primary,
+    .detail-btn {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+    }
+
+    .detail-btn:hover {
+      background: #154d83;
+      color: #fff;
+    }
+
+    .filters,
+    .print-actions {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 12px;
+      align-items: end;
+    }
+
+    .print-actions {
+      grid-template-columns: repeat(4, minmax(150px, auto));
+      margin-top: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      min-height: 42px;
+      padding: 9px 11px;
+      color: var(--ink);
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    input:focus,
+    select:focus,
+    button:focus-visible {
+      outline: 3px solid rgba(247, 201, 72, 0.45);
+      outline-offset: 2px;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(21, 89, 155, 0.1);
+    }
+
+    .task-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .task-count {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .task-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .task-card {
+      display: grid;
+      gap: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(11, 47, 91, 0.08);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+      animation: fadeUp 0.38s ease both;
+    }
+
+    .task-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(21, 89, 155, 0.45);
+      box-shadow: 0 18px 42px rgba(11, 47, 91, 0.16);
+    }
+
+    .task-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 6px;
+      background: var(--blue);
+      transition: width 0.22s ease;
+    }
+
+    .task-card:hover::before {
+      width: 9px;
+    }
+
+    .task-card.psv::before {
+      background: var(--orange);
+    }
+
+    .task-topline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding-left: 4px;
+    }
+
+    .subject-badge,
+    .date-badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      min-height: 28px;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .subject-badge {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .task-card.psv .subject-badge {
+      background: #fff1c2;
+      color: #7a4200;
+      border: 1px solid #f4cf64;
+    }
+
+    .date-badge {
+      background: var(--light-blue);
+      color: var(--navy);
+      border: 1px solid #d2e5f5;
+    }
+
+    .task-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .task-title h3 {
+      margin: 0;
+      color: var(--navy);
+      font-size: 1.1rem;
+    }
+
+    .time {
+      color: var(--ink);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .focus {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .task-summary {
+      margin: 0;
+      color: #2f3b50;
+    }
+
+    .worksheet-box {
+      background: linear-gradient(180deg, #fbfdff, #f2f7fc);
+      border: 1px solid #cfe0ef;
+      border-radius: var(--radius);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .task-card.psv .worksheet-box {
+      background: linear-gradient(180deg, #fffaf0, #fff3cd);
+      border-color: #f2d274;
+    }
+
+    .worksheet-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .worksheet-title {
+      margin: 0;
+      color: var(--navy);
+      font-weight: 800;
+      font-size: 0.95rem;
+    }
+
+    .worksheet-meta {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .worksheet-list {
+      margin: 0;
+      padding-left: 20px;
+      color: #26364c;
+      font-size: 0.9rem;
+    }
+
+    .worksheet-list li {
+      margin: 4px 0;
+    }
+
+    .exam-sheet {
+      position: relative;
+      background: #fff;
+      border: 1px solid #bac7d6;
+      border-radius: 6px;
+      padding: 14px;
+      color: #111827;
+      box-shadow: 0 12px 24px rgba(24, 39, 75, 0.12);
+      overflow: hidden;
+      transform: rotate(-0.35deg);
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .task-card:hover .exam-sheet {
+      transform: rotate(0deg) scale(1.01);
+      box-shadow: 0 16px 30px rgba(24, 39, 75, 0.16);
+    }
+
+    .exam-sheet::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent 0 46px, rgba(220, 38, 38, 0.18) 46px 47px, transparent 47px),
+        repeating-linear-gradient(180deg, transparent 0 27px, rgba(15, 23, 42, 0.08) 27px 28px);
+      pointer-events: none;
+    }
+
+    .exam-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .exam-header {
+      display: grid;
+      grid-template-columns: 1fr 72px;
+      gap: 10px;
+      align-items: center;
+      border: 2px solid #1f2937;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    .exam-school,
+    .exam-title,
+    .exam-meta {
+      margin: 0;
+    }
+
+    .exam-school {
+      font-size: 0.68rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      color: #111827;
+    }
+
+    .exam-title {
+      font-size: 0.78rem;
+      font-weight: 900;
+      color: #0b2f5b;
+    }
+
+    .exam-meta {
+      font-size: 0.62rem;
+      color: #4b5563;
+      font-weight: 700;
+    }
+
+    .exam-marks {
+      min-height: 48px;
+      border: 1.5px solid #111827;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-size: 0.62rem;
+      font-weight: 900;
+    }
+
+    .exam-fields {
+      display: grid;
+      grid-template-columns: 1.3fr 0.8fr 0.9fr;
+      gap: 8px;
+      margin: 10px 0;
+      font-size: 0.68rem;
+      font-weight: 800;
+    }
+
+    .exam-field {
+      border-bottom: 1.5px solid #111827;
+      min-height: 22px;
+      padding: 2px 0;
+    }
+
+    .exam-questions {
+      display: grid;
+      gap: 7px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: 0.72rem;
+    }
+
+    .exam-question {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 6px;
+      break-inside: avoid;
+    }
+
+    .question-no {
+      width: 21px;
+      height: 21px;
+      border: 1px solid #111827;
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 0.66rem;
+      background: #fff;
+    }
+
+    .question-text {
+      margin: 0;
+      font-weight: 800;
+    }
+
+    .choice-list {
+      display: grid;
+      gap: 3px;
+      margin-top: 6px;
+      font-weight: 700;
+    }
+
+    .choice-item {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 5px;
+      align-items: start;
+    }
+
+    .choice-label {
+      font-weight: 900;
+      color: var(--navy);
+    }
+
+    .answer-line {
+      display: block;
+      min-height: 16px;
+      border-bottom: 1px dotted #475569;
+      margin-top: 4px;
+    }
+
+    .exam-footer-note {
+      margin: 10px 0 0;
+      border-top: 1px solid #111827;
+      padding-top: 6px;
+      text-align: center;
+      font-size: 0.62rem;
+      font-weight: 900;
+      color: #334155;
+    }
+
+    .task-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+    }
+
+    .task-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .deliverable {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .teacher-panel,
+    .admin-panel {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-left: 6px solid var(--blue);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .teacher-row,
+    .admin-login {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .teacher-status,
+    .admin-status {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .tick-btn {
+      background: #0f766e;
+      border-color: #0f766e;
+      color: #fff;
+    }
+
+    .tick-btn:hover {
+      background: #0b615b;
+      border-color: #0b615b;
+      color: #fff;
+    }
+
+    .delete-btn {
+      margin-top: 10px;
+      background: #b91c1c;
+      border-color: #b91c1c;
+      color: #fff;
+    }
+
+    .delete-btn:hover {
+      background: #991b1b;
+      border-color: #991b1b;
+      color: #fff;
+    }
+
+    .completed-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .completed-item {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 12px;
+      background: #fbfdff;
+    }
+
+    .completed-item strong {
+      color: var(--navy);
+    }
+
+    .completed-item p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .copy-toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: var(--navy);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      padding: 10px 14px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 40;
+    }
+
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .empty-state {
+      display: none;
+      border: 1px dashed #b5c4d5;
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .empty-state.show {
+      display: block;
+    }
+
+    .substitute-note ul {
+      margin: 8px 0 0;
+      padding-left: 20px;
+      color: #2f3b50;
+    }
+
+    .substitute-note li {
+      margin: 5px 0;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 22, 42, 0.58);
+      display: none;
+      place-items: center;
+      padding: 20px;
+      z-index: 30;
+    }
+
+    .modal-backdrop.show {
+      display: grid;
+    }
+
+    .modal {
+      width: min(760px, 100%);
+      max-height: min(86vh, 820px);
+      overflow: auto;
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+      border: 1px solid var(--line);
+      animation: modalIn 0.22s ease both;
+    }
+
+    .modal-header {
+      background: var(--navy);
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 16px 18px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+
+    .modal-body {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .detail-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .detail-item {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 11px;
+      background: #fbfdff;
+    }
+
+    .detail-item strong {
+      display: block;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .detail-block {
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+    }
+
+    .detail-block h3 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+      color: var(--navy);
+    }
+
+    .detail-block p,
+    .detail-block ol,
+    .detail-block ul {
+      margin: 0;
+      color: #2f3b50;
+    }
+
+    .detail-block ol,
+    .detail-block ul {
+      padding-left: 22px;
+    }
+
+    .print-area {
+      display: none;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @media (max-width: 960px) {
+      .dashboard {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .filters,
+      .print-actions,
+      .task-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .task-toolbar {
+        align-items: start;
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .header-inner {
+        width: min(100% - 24px, 1180px);
+        grid-template-columns: 64px 1fr;
+        gap: 14px;
+        padding: 20px 0;
+      }
+
+      .school-badge {
+        width: 64px;
+        height: 64px;
+      }
+
+      main {
+        width: min(100% - 24px, 1180px);
+      }
+
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .task-title,
+      .task-footer,
+      .teacher-row,
+      .admin-login {
+        flex-direction: column;
+        align-items: start;
+      }
+
+      .teacher-row,
+      .admin-login {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .detail-list {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @page {
+      size: A4;
+      margin: 14mm;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        color: #000;
+      }
+
+      .site-header,
+      main,
+      .modal-backdrop {
+        display: none !important;
+      }
+
+      .print-area {
+        display: block;
+      }
+
+      .print-doc {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #000;
+      }
+
+      .print-head {
+        display: grid;
+        grid-template-columns: 70px 1fr;
+        gap: 14px;
+        align-items: center;
+        border-bottom: 2px solid #000;
+        padding-bottom: 10px;
+        margin-bottom: 12px;
+      }
+
+      .print-head img {
+        width: 68px;
+        height: 68px;
+        object-fit: contain;
+      }
+
+      .print-head h1,
+      .print-head h2,
+      .print-head p {
+        margin: 0;
+      }
+
+      .print-head h1 {
+        font-size: 15pt;
+        text-transform: uppercase;
+      }
+
+      .print-head h2 {
+        font-size: 12pt;
+        margin-top: 4px;
+      }
+
+      .print-head p,
+      .print-meta p {
+        font-size: 10pt;
+      }
+
+      .print-meta {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 4px 16px;
+        margin-bottom: 12px;
+      }
+
+      .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 7.8pt;
+      }
+
+      .print-table th,
+      .print-table td {
+        border: 1px solid #000;
+        vertical-align: top;
+        padding: 5px;
+      }
+
+      .print-table th {
+        background: #f2f2f2;
+        color: #000;
+      }
+
+      .signatures {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin-top: 32px;
+        page-break-inside: avoid;
+      }
+
+      .signature-box {
+        min-height: 95px;
+        border-top: 1px solid #000;
+        padding-top: 8px;
+        font-size: 10pt;
+      }
+
+      .print-note {
+        border: 1px solid #000;
+        padding: 8px;
+        margin: 12px 0;
+        font-size: 9pt;
+      }
+
+      * {
+        box-shadow: none !important;
+        text-shadow: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <div class="header-inner">
+        <img class="school-badge" src="https://iili.io/Cfm9iIp.md.png" alt="Lencana SEKOLAH KEBANGSAAN SUNGAI TIRAM">
+        <div>
+          <h1 class="school-name">SEKOLAH KEBANGSAAN SUNGAI TIRAM</h1>
+          <p class="system-title">SISTEM TUGASAN MURID SEMASA GURU BERTUGAS LUAR STESEN</p>
+          <div class="header-meta">
+            <span class="meta-pill">Guru: MUHAMMAD HANIF BIN ISMAIL</span>
+            <span class="meta-pill">Tempoh: Isnin hingga Jumaat</span>
+            <span class="meta-pill">Tarikh: 8 Jun 2026 hingga 12 Jun 2026</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="notice" aria-labelledby="makluman-title">
+        <h2 id="makluman-title">Catatan Penting</h2>
+        <p>Sepanjang guru bertugas di luar stesen, murid perlu menyiapkan tugasan yang diberikan mengikut jadual. Guru ganti boleh memantau kelas berdasarkan senarai tugasan ini. Semua hasil kerja perlu dihantar kepada guru mata pelajaran selepas guru kembali bertugas.</p>
+      </section>
+
+      <section class="dashboard" aria-label="Dashboard ringkas">
+        <article class="summary-card">
+          <span class="summary-value" id="totalDays">5</span>
+          <span class="summary-label">Jumlah hari tugasan</span>
+        </article>
+        <article class="summary-card">
+          <span class="summary-value" id="totalClasses">10</span>
+          <span class="summary-label">Jumlah kelas terlibat</span>
+        </article>
+        <article class="summary-card">
+          <span class="summary-value" id="totalScience">18</span>
+          <span class="summary-label">Jumlah tugasan Sains</span>
+        </article>
+        <article class="summary-card">
+          <span class="summary-value" id="totalPsv">3</span>
+          <span class="summary-label">Jumlah tugasan PSV</span>
+        </article>
+        <article class="summary-card">
+          <span class="summary-value">8 - 12</span>
+          <span class="summary-label">Tempoh Jun 2026</span>
+        </article>
+      </section>
+
+      <section class="teacher-panel" aria-labelledby="teacher-title">
+        <h2 class="section-title" id="teacher-title">Nama Guru Ganti</h2>
+        <div class="teacher-row">
+          <label for="substituteTeacherName">
+            Isi nama guru ganti sebelum menanda tugasan
+            <input id="substituteTeacherName" type="text" placeholder="Contoh: CIKGU AHMAD BIN ALI">
+          </label>
+          <label for="replacementClassName">
+            Isi nama kelas gantian
+            <input id="replacementClassName" type="text" placeholder="Contoh: 3 UPM">
+          </label>
+          <button class="action-btn primary" id="saveTeacherBtn" type="button">Simpan</button>
+        </div>
+        <p class="teacher-status" id="teacherStatus">Isikan nama guru ganti dan nama kelas gantian.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="task-title">
+        <div class="task-toolbar">
+          <h2 class="section-title" id="task-title">Jadual Tugasan Murid</h2>
+          <span class="task-count" id="taskCount"></span>
+        </div>
+        <div class="task-grid" id="taskGrid"></div>
+        <div class="empty-state" id="emptyState">Tiada tugasan sepadan dengan tapisan semasa.</div>
+      </section>
+
+      <section class="admin-panel" aria-labelledby="admin-title">
+        <h2 class="section-title" id="admin-title">Ruang Admin</h2>
+        <div class="admin-login" id="adminLogin">
+          <label for="adminPassword">
+            Kata laluan admin
+            <input id="adminPassword" type="password" placeholder="Masukkan kata laluan">
+          </label>
+          <button class="action-btn primary" id="adminLoginBtn" type="button">Buka Admin</button>
+        </div>
+        <p class="admin-status" id="adminStatus">Masukkan kata laluan untuk melihat tugasan yang telah selesai.</p>
+        <div class="completed-list" id="completedList"></div>
+      </section>
+
+      <section class="substitute-note" aria-labelledby="nota-title">
+        <h2 id="nota-title">Nota Guru Ganti</h2>
+        <ul>
+          <li>Pastikan murid menyiapkan tugasan mengikut masa yang ditetapkan.</li>
+          <li>Murid tidak dibenarkan menukar tugasan kelas lain.</li>
+          <li>Hasil kerja perlu dikumpul di atas meja guru atau mengikut arahan guru ganti.</li>
+          <li>Catat nama murid yang tidak menyiapkan tugasan.</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <article class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Perincian Tugasan</h2>
+        <button class="close-btn" id="closeModalBtn" type="button">Tutup</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </article>
+  </div>
+
+  <section class="print-area" id="printArea" aria-hidden="true"></section>
+  <div class="copy-toast" id="copyToast" role="status" aria-live="polite">Lembaran kerja telah disalin.</div>
+
+  <script>
+    const badgeUrl = "https://iili.io/Cfm9iIp.md.png";
+
+    const tasks = [
+      {
+        id: 1,
+        day: "Isnin",
+        date: "8 Jun 2026",
+        time: "1:15 - 1:45",
+        className: "3 UMS",
+        year: "3",
+        subject: "Sains",
+        focus: "Ulang kaji topik Sains semasa mengikut DSKP Tahun 3",
+        task: "Murid perlu membaca semula nota topik yang telah dipelajari. Kemudian jawab latihan ulang kaji objektif dan subjektif ringkas berkaitan topik tersebut.",
+        instructions: ["Salin tajuk: Ulang Kaji Sains Tahun 3", "Jawab 10 soalan objektif", "Jawab 3 soalan struktur pendek", "Semak semula jawapan sebelum dihantar"],
+        materials: "Nota topik semasa, buku teks atau bahan latihan yang disediakan, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Mengukuhkan kefahaman konsep Sains Tahun 3 dan membiasakan murid dengan bentuk soalan peperiksaan.",
+        steps: ["Guru ganti mengarahkan murid menyediakan buku latihan.", "Murid membaca nota semula secara senyap.", "Murid menjawab soalan objektif dan struktur pendek.", "Guru ganti mengumpul atau memastikan hasil kerja disimpan dengan kemas."],
+        substituteNote: "Pantau murid supaya menyiapkan semua soalan dalam tempoh masa yang ditetapkan."
+      },
+      {
+        id: 2,
+        day: "Isnin",
+        date: "8 Jun 2026",
+        time: "2:15 - 2:45",
+        className: "3 UPM",
+        year: "3",
+        subject: "Sains",
+        focus: "Ulang kaji topik Sains semasa mengikut DSKP Tahun 3",
+        task: "Murid menjawab latihan pengukuhan berdasarkan topik pembelajaran terkini. Latihan mestilah menekankan kefahaman konsep dan kemahiran menjawab soalan peperiksaan.",
+        instructions: ["Sediakan buku latihan Sains.", "Jawab latihan pengukuhan berdasarkan topik semasa.", "Bulatkan kata kunci penting dalam soalan.", "Semak jawapan sebelum dihantar."],
+        materials: "Buku latihan Sains, nota topik semasa, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Membantu murid menguasai semula fakta penting dan kaedah menjawab soalan Sains.",
+        steps: ["Guru ganti menerangkan tugasan ringkas.", "Murid menyelesaikan latihan secara individu.", "Murid menyemak semula jawapan.", "Hasil kerja dikumpulkan mengikut arahan guru ganti."],
+        substituteNote: "Beri perhatian kepada murid yang memerlukan bimbingan asas membaca soalan."
+      },
+      {
+        id: 3,
+        day: "Isnin",
+        date: "8 Jun 2026",
+        time: "2:45 - 3:15",
+        className: "3 UPM",
+        year: "3",
+        subject: "Sains",
+        focus: "Latihan tambahan ulang kaji",
+        task: "Murid menyambung latihan ulang kaji. Murid perlu membina peta minda ringkas berdasarkan topik yang telah dipelajari.",
+        instructions: ["Sambung latihan ulang kaji yang belum siap.", "Bina satu peta minda ringkas.", "Masukkan sekurang-kurangnya lima fakta penting.", "Pastikan tulisan kemas dan mudah dibaca."],
+        materials: "Buku latihan atau kertas latihan, nota, pensel warna jika perlu.",
+        deliverable: "Buku latihan / kertas latihan",
+        objective: "Menyusun fakta penting topik Sains dalam bentuk visual yang mudah diingat.",
+        steps: ["Murid menyambung latihan sedia ada.", "Murid memilih fakta penting daripada nota.", "Murid melengkapkan peta minda.", "Guru ganti menyemak kemajuan kerja murid."],
+        substituteNote: "Pastikan peta minda berkaitan topik Sains semasa dan bukan lukisan bebas."
+      },
+      {
+        id: 4,
+        day: "Isnin",
+        date: "8 Jun 2026",
+        time: "3:35 - 4:35",
+        className: "1 USM",
+        year: "1",
+        subject: "Sains",
+        focus: "Ulang kaji asas Sains Tahun 1",
+        task: "Murid membuat latihan ulang kaji bergambar. Murid perlu memadankan gambar dengan jawapan yang betul dan menyalin semula ayat mudah.",
+        instructions: ["Lihat gambar dengan teliti.", "Padankan gambar dengan jawapan yang betul.", "Salin semula ayat mudah dengan kemas.", "Warnakan gambar jika masa mencukupi."],
+        materials: "Buku latihan Sains, lembaran bergambar, pensel warna, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Mengukuhkan pengenalan konsep asas Sains Tahun 1 melalui gambar dan ayat mudah.",
+        steps: ["Guru ganti membantu murid memahami arahan.", "Murid melengkapkan padanan gambar.", "Murid menyalin ayat mudah.", "Guru ganti memastikan murid menyiapkan tugasan mengikut kemampuan."],
+        substituteNote: "Bimbing murid Tahun 1 dengan arahan yang jelas dan ringkas."
+      },
+      {
+        id: 5,
+        day: "Isnin",
+        date: "8 Jun 2026",
+        time: "5:05 - 5:35",
+        className: "3 UTM",
+        year: "3",
+        subject: "Sains",
+        focus: "Ulang kaji topik Sains Tahun 3",
+        task: "Murid menjawab latihan ringkas berkaitan fakta penting topik semasa.",
+        instructions: ["Baca arahan soalan.", "Jawab latihan ringkas berdasarkan fakta penting.", "Semak ejaan istilah Sains.", "Hantar buku latihan selepas selesai."],
+        materials: "Buku latihan Sains, nota, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Mengingat semula fakta penting Sains Tahun 3 sebagai persediaan peperiksaan.",
+        steps: ["Guru ganti meminta murid membuka buku latihan.", "Murid menjawab latihan secara individu.", "Murid menyemak istilah dan jawapan.", "Hasil kerja dikumpulkan atau disimpan mengikut arahan."],
+        substituteNote: "Pastikan murid tidak berbincang secara bising semasa menjawab latihan."
+      },
+      {
+        id: 6,
+        day: "Selasa",
+        date: "9 Jun 2026",
+        time: "2:15 - 2:45",
+        className: "3 UMS",
+        year: "3",
+        subject: "Sains",
+        focus: "Ulang kaji topik semasa",
+        task: "Murid membaca nota ringkas dan menjawab soalan ulang kaji.",
+        instructions: ["Baca nota ringkas yang berkaitan.", "Jawab semua soalan ulang kaji.", "Tulis jawapan dengan lengkap.", "Semak jawapan sebelum dihantar."],
+        materials: "Nota ringkas, buku latihan Sains, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Memantapkan ingatan murid terhadap topik semasa.",
+        steps: ["Murid membaca nota selama beberapa minit.", "Murid menjawab latihan ulang kaji.", "Guru ganti memantau disiplin dan kemajuan.", "Hasil kerja dikumpulkan."],
+        substituteNote: "Galakkan murid menjawab berdasarkan nota, bukan menyalin jawapan rakan."
+      },
+      {
+        id: 7,
+        day: "Selasa",
+        date: "9 Jun 2026",
+        time: "2:45 - 3:15",
+        className: "3 UMS",
+        year: "3",
+        subject: "Sains",
+        focus: "Latihan peperiksaan",
+        task: "Murid menjawab soalan berbentuk objektif dan struktur pendek.",
+        instructions: ["Jawab soalan objektif terlebih dahulu.", "Jawab soalan struktur pendek menggunakan ayat lengkap.", "Gariskan kata kunci soalan.", "Semak semula semua jawapan."],
+        materials: "Buku latihan Sains atau lembaran latihan, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Melatih murid menjawab format soalan peperiksaan dengan lebih teratur.",
+        steps: ["Guru ganti mengingatkan murid tentang disiplin peperiksaan.", "Murid menjawab soalan objektif.", "Murid menjawab soalan struktur.", "Murid menyemak dan menghantar latihan."],
+        substituteNote: "Rekod murid yang tidak menyiapkan latihan."
+      },
+      {
+        id: 8,
+        day: "Selasa",
+        date: "9 Jun 2026",
+        time: "3:35 - 4:35",
+        className: "3 UKM",
+        year: "3",
+        subject: "Sains",
+        focus: "Ulang kaji topik Sains Tahun 3",
+        task: "Murid melengkapkan latihan pengukuhan berdasarkan topik DSKP semasa.",
+        instructions: ["Baca soalan dengan teliti.", "Lengkapkan latihan pengukuhan.", "Gunakan istilah Sains yang tepat.", "Pastikan semua soalan dijawab."],
+        materials: "Buku latihan Sains, nota topik DSKP semasa, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Mengukuhkan penguasaan topik Sains Tahun 3 yang sedang dipelajari.",
+        steps: ["Guru ganti mengagihkan tugasan atau memberi arahan.", "Murid menyiapkan latihan.", "Murid menyemak semula jawapan.", "Guru ganti memastikan hasil kerja dikumpulkan."],
+        substituteNote: "Pastikan murid menulis nama dan tarikh pada tugasan."
+      },
+      {
+        id: 9,
+        day: "Selasa",
+        date: "9 Jun 2026",
+        time: "5:05 - 6:05",
+        className: "2 UKM",
+        year: "2",
+        subject: "PSV",
+        focus: "Ulang kaji Pendidikan Seni Visual",
+        task: "Murid menghasilkan lukisan ringkas bertema \"Alam Sekitar Sekolah Saya\". Murid perlu mewarna dengan kemas dan menulis 3 ayat ringkas tentang hasil lukisan.",
+        instructions: ["Lukis tema Alam Sekitar Sekolah Saya.", "Warnakan lukisan dengan kemas.", "Tulis 3 ayat ringkas tentang lukisan.", "Pastikan nama dan kelas ditulis pada kertas."],
+        materials: "Kertas lukisan atau buku PSV, pensel, pemadam, pensel warna.",
+        deliverable: "Kertas lukisan / buku PSV",
+        objective: "Mengukuhkan kemahiran pemerhatian, lakaran, mewarna dan penerangan ringkas dalam PSV.",
+        steps: ["Guru ganti menerangkan tema.", "Murid membuat lakaran awal.", "Murid mewarna dengan kemas.", "Murid menulis tiga ayat ringkas dan menghantar hasil kerja."],
+        substituteNote: "Pastikan murid tidak meniru hasil kerja rakan sepenuhnya."
+      },
+      {
+        id: 10,
+        day: "Rabu",
+        date: "10 Jun 2026",
+        time: "1:15 - 2:15",
+        className: "2 UTM",
+        year: "2",
+        subject: "Sains",
+        focus: "Ulang kaji Sains Tahun 2",
+        task: "Murid menjawab latihan berkaitan topik semasa. Gunakan latihan berbentuk padanan, isi tempat kosong dan soalan pendek.",
+        instructions: ["Jawab soalan padanan.", "Lengkapkan isi tempat kosong.", "Jawab soalan pendek dengan ayat mudah.", "Semak jawapan sebelum dihantar."],
+        materials: "Buku latihan Sains, lembaran latihan, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Mengukuhkan kefahaman murid Tahun 2 terhadap topik Sains semasa.",
+        steps: ["Guru ganti membaca arahan bersama murid.", "Murid menjawab padanan dan isi tempat kosong.", "Murid menjawab soalan pendek.", "Guru ganti memantau dan mengumpul kerja."],
+        substituteNote: "Bimbing murid yang perlukan bantuan membaca arahan."
+      },
+      {
+        id: 11,
+        day: "Rabu",
+        date: "10 Jun 2026",
+        time: "2:15 - 2:45",
+        className: "3 UTM",
+        year: "3",
+        subject: "Sains",
+        focus: "Ulang kaji Sains Tahun 3",
+        task: "Murid menjawab latihan ulang kaji berdasarkan topik DSKP semasa.",
+        instructions: ["Sediakan buku latihan Sains.", "Jawab latihan ulang kaji topik semasa.", "Tulis jawapan dengan jelas.", "Semak semula sebelum dihantar."],
+        materials: "Buku latihan Sains, nota topik semasa, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Menilai semula kefahaman murid terhadap topik DSKP semasa.",
+        steps: ["Guru ganti memberi arahan tugasan.", "Murid menjawab latihan.", "Murid menyemak semula.", "Guru ganti mengumpul hasil kerja."],
+        substituteNote: "Pastikan suasana kelas terkawal semasa tugasan individu."
+      },
+      {
+        id: 12,
+        day: "Rabu",
+        date: "10 Jun 2026",
+        time: "3:35 - 4:35",
+        className: "1 UTP",
+        year: "1",
+        subject: "Sains",
+        focus: "Ulang kaji asas Sains Tahun 1",
+        task: "Murid membuat latihan bergambar, mewarna gambar berkaitan topik Sains dan menyalin perkataan penting.",
+        instructions: ["Lengkapkan latihan bergambar.", "Warnakan gambar berkaitan topik Sains.", "Salin perkataan penting dengan kemas.", "Hantar buku latihan selepas siap."],
+        materials: "Buku latihan Sains, lembaran bergambar, pensel warna, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Membantu murid Tahun 1 mengenal dan mengingat perkataan penting Sains.",
+        steps: ["Guru ganti memberi arahan ringkas.", "Murid melengkapkan latihan bergambar.", "Murid mewarna dan menyalin perkataan.", "Guru ganti menyemak kerja yang siap."],
+        substituteNote: "Arahan boleh dibaca perlahan-lahan kepada murid."
+      },
+      {
+        id: 13,
+        day: "Rabu",
+        date: "10 Jun 2026",
+        time: "4:35 - 5:05",
+        className: "2 UMP",
+        year: "2",
+        subject: "Sains",
+        focus: "Ulang kaji Sains Tahun 2",
+        task: "Murid menjawab latihan ringkas berbentuk objektif dan isi tempat kosong.",
+        instructions: ["Jawab soalan objektif.", "Lengkapkan isi tempat kosong.", "Gunakan ejaan yang betul.", "Semak semua jawapan."],
+        materials: "Buku latihan Sains atau lembaran latihan, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Mengukuhkan fakta asas Sains Tahun 2 menjelang peperiksaan.",
+        steps: ["Murid membaca setiap soalan.", "Murid menjawab objektif dan isi tempat kosong.", "Murid menyemak jawapan.", "Guru ganti memastikan buku latihan disimpan atau dikumpulkan."],
+        substituteNote: "Tegaskan tulisan kemas dan lengkap."
+      },
+      {
+        id: 14,
+        day: "Khamis",
+        date: "11 Jun 2026",
+        time: "2:15 - 2:45",
+        className: "2 UTM",
+        year: "2",
+        subject: "Sains",
+        focus: "Ulang kaji topik semasa Tahun 2",
+        task: "Murid menjawab latihan pengukuhan ringkas.",
+        instructions: ["Baca arahan tugasan.", "Jawab latihan pengukuhan ringkas.", "Tulis jawapan dengan kemas.", "Semak sebelum dihantar."],
+        materials: "Buku latihan Sains, nota ringkas, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Mengulang semula konsep penting dalam topik semasa Tahun 2.",
+        steps: ["Guru ganti memberi arahan.", "Murid menjawab latihan secara individu.", "Murid menyemak jawapan.", "Hasil kerja dikumpulkan jika selesai."],
+        substituteNote: "Pastikan murid kekal di tempat masing-masing."
+      },
+      {
+        id: 15,
+        day: "Khamis",
+        date: "11 Jun 2026",
+        time: "2:45 - 3:15",
+        className: "3 UPM",
+        year: "3",
+        subject: "Sains",
+        focus: "Ulang kaji topik Sains Tahun 3",
+        task: "Murid menjawab soalan latihan peperiksaan berdasarkan topik semasa.",
+        instructions: ["Jawab soalan latihan peperiksaan.", "Gunakan jawapan lengkap untuk soalan struktur.", "Semak istilah Sains.", "Pastikan semua soalan dijawab."],
+        materials: "Buku latihan Sains atau lembaran peperiksaan ringkas, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Meningkatkan kemahiran menjawab soalan peperiksaan Sains Tahun 3.",
+        steps: ["Guru ganti mengingatkan murid tentang cara menjawab.", "Murid menjawab soalan peperiksaan.", "Murid menyemak semula jawapan.", "Guru ganti merekod murid yang tidak siap."],
+        substituteNote: "Galakkan murid mengurus masa dengan baik."
+      },
+      {
+        id: 16,
+        day: "Khamis",
+        date: "11 Jun 2026",
+        time: "3:35 - 4:05",
+        className: "3 UKM",
+        year: "3",
+        subject: "Sains",
+        focus: "Ulang kaji pantas",
+        task: "Murid menjawab 10 soalan objektif dan 2 soalan struktur ringkas.",
+        instructions: ["Jawab 10 soalan objektif.", "Jawab 2 soalan struktur ringkas.", "Semak jawapan dengan teliti.", "Hantar buku latihan selepas selesai."],
+        materials: "Buku latihan Sains, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Melaksanakan ulang kaji pantas untuk menguji ingatan fakta penting.",
+        steps: ["Murid menyediakan buku latihan.", "Murid menjawab soalan objektif.", "Murid menjawab soalan struktur.", "Guru ganti mengumpul tugasan."],
+        substituteNote: "Tetapkan suasana senyap seperti latihan peperiksaan."
+      },
+      {
+        id: 17,
+        day: "Khamis",
+        date: "11 Jun 2026",
+        time: "4:35 - 5:05",
+        className: "1 UTP",
+        year: "1",
+        subject: "Sains",
+        focus: "Ulang kaji asas Sains Tahun 1",
+        task: "Murid membuat aktiviti padanan gambar dan perkataan.",
+        instructions: ["Lihat gambar dengan teliti.", "Padankan gambar dengan perkataan yang betul.", "Salin perkataan pilihan.", "Warnakan gambar jika tugasan siap awal."],
+        materials: "Buku latihan Sains, lembaran padanan, pensel warna, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Mengukuhkan perkaitan gambar dan perkataan Sains asas.",
+        steps: ["Guru ganti menerangkan contoh padanan.", "Murid melengkapkan aktiviti.", "Murid menyalin perkataan.", "Guru ganti menyemak tugasan yang siap."],
+        substituteNote: "Bantu murid yang belum lancar membaca perkataan."
+      },
+      {
+        id: 18,
+        day: "Khamis",
+        date: "11 Jun 2026",
+        time: "5:05 - 6:05",
+        className: "2 USM",
+        year: "2",
+        subject: "PSV",
+        focus: "Ulang kaji Pendidikan Seni Visual",
+        task: "Murid menghasilkan corak mudah menggunakan garisan dan bentuk. Warnakan dengan kemas.",
+        instructions: ["Hasilkan corak menggunakan garisan dan bentuk.", "Susun corak dengan kemas.", "Warnakan corak dengan pilihan warna yang sesuai.", "Tulis nama dan kelas pada hasil kerja."],
+        materials: "Buku PSV atau kertas lukisan, pensel, pembaris, pensel warna.",
+        deliverable: "Buku PSV / kertas lukisan",
+        objective: "Mengukuhkan kefahaman murid tentang garisan, bentuk, corak dan kemasan warna.",
+        steps: ["Guru ganti menunjukkan arahan tema.", "Murid melakar corak.", "Murid mewarna dengan kemas.", "Hasil kerja dikumpulkan selepas tamat masa."],
+        substituteNote: "Pastikan murid membawa pulang alatan sendiri dan kelas kekal bersih."
+      },
+      {
+        id: 19,
+        day: "Jumaat",
+        date: "12 Jun 2026",
+        time: "2:50 - 3:20",
+        className: "1 USM",
+        year: "1",
+        subject: "Sains",
+        focus: "Ulang kaji Sains Tahun 1",
+        task: "Murid menjawab latihan mudah berbentuk gambar, padanan dan salin semula perkataan penting.",
+        instructions: ["Jawab latihan bergambar.", "Padankan jawapan yang betul.", "Salin perkataan penting dengan kemas.", "Hantar buku latihan selepas siap."],
+        materials: "Buku latihan Sains, lembaran bergambar, alat tulis, pensel warna.",
+        deliverable: "Buku latihan Sains",
+        objective: "Mengulang semula konsep asas Sains Tahun 1 melalui latihan mudah.",
+        steps: ["Guru ganti membaca arahan.", "Murid menyiapkan latihan bergambar dan padanan.", "Murid menyalin perkataan.", "Guru ganti memastikan buku latihan dikumpulkan."],
+        substituteNote: "Pastikan murid tidak tertinggal buku latihan selepas tamat kelas."
+      },
+      {
+        id: 20,
+        day: "Jumaat",
+        date: "12 Jun 2026",
+        time: "3:50 - 4:50",
+        className: "3 UPM",
+        year: "3",
+        subject: "PSV",
+        focus: "Pendidikan Seni Visual",
+        task: "Murid menghasilkan lukisan bertema \"Hari Peperiksaan Saya\". Murid perlu melukis, mewarna dan menulis 3 ayat ringkas tentang lukisan tersebut.",
+        instructions: ["Lukis tema Hari Peperiksaan Saya.", "Warnakan lukisan dengan kemas.", "Tulis 3 ayat ringkas tentang lukisan.", "Pastikan hasil kerja mempunyai nama dan kelas."],
+        materials: "Buku PSV atau kertas lukisan, pensel, pemadam, pensel warna.",
+        deliverable: "Buku PSV / kertas lukisan",
+        objective: "Membina ekspresi visual dan kemahiran menerangkan karya secara ringkas.",
+        steps: ["Guru ganti menerangkan tema.", "Murid melakar situasi peperiksaan.", "Murid mewarna dan menulis ayat.", "Guru ganti mengumpul hasil kerja."],
+        substituteNote: "Pastikan tema lukisan sopan dan berkaitan peperiksaan."
+      },
+      {
+        id: 21,
+        day: "Jumaat",
+        date: "12 Jun 2026",
+        time: "4:50 - 5:50",
+        className: "2 UMP",
+        year: "2",
+        subject: "Sains",
+        focus: "Ulang kaji Sains Tahun 2",
+        task: "Murid menjawab latihan ulang kaji ringkas sebagai persediaan peperiksaan.",
+        instructions: ["Jawab latihan ulang kaji ringkas.", "Tulis jawapan dengan jelas.", "Semak semula jawapan.", "Hantar buku latihan kepada guru ganti."],
+        materials: "Buku latihan Sains, nota, alat tulis.",
+        deliverable: "Buku latihan Sains",
+        objective: "Menyediakan murid Tahun 2 menghadapi peperiksaan melalui ulang kaji ringkas.",
+        steps: ["Guru ganti memberi arahan tugasan.", "Murid menjawab latihan.", "Murid menyemak semula.", "Guru ganti mengumpul buku latihan."],
+        substituteNote: "Catat nama murid yang tidak menyiapkan tugasan."
+      }
+    ];
+
+    const days = [
+      { key: "Isnin", label: "Isnin, 8 Jun 2026" },
+      { key: "Selasa", label: "Selasa, 9 Jun 2026" },
+      { key: "Rabu", label: "Rabu, 10 Jun 2026" },
+      { key: "Khamis", label: "Khamis, 11 Jun 2026" },
+      { key: "Jumaat", label: "Jumaat, 12 Jun 2026" },
+      { key: "all", label: "Paparan Semua Tugasan" }
+    ];
+
+    const state = {
+      day: "all",
+      search: "",
+      subject: "all",
+      year: "all"
+    };
+
+    const taskGrid = document.getElementById("taskGrid");
+    const taskCount = document.getElementById("taskCount");
+    const emptyState = document.getElementById("emptyState");
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalBody = document.getElementById("modalBody");
+    const modalTitle = document.getElementById("modalTitle");
+    const printArea = document.getElementById("printArea");
+    const copyToast = document.getElementById("copyToast");
+    const substituteTeacherName = document.getElementById("substituteTeacherName");
+    const replacementClassName = document.getElementById("replacementClassName");
+    const saveTeacherBtn = document.getElementById("saveTeacherBtn");
+    const teacherStatus = document.getElementById("teacherStatus");
+    const adminPassword = document.getElementById("adminPassword");
+    const adminLoginBtn = document.getElementById("adminLoginBtn");
+    const adminStatus = document.getElementById("adminStatus");
+    const completedList = document.getElementById("completedList");
+    const storageKey = "skstCompletedTasks";
+    const teacherKey = "skstSubstituteTeacher";
+    const adminPasswordValue = "skst@1234";
+    let completedTasks = loadCompletedTasks();
+    let substituteTeacher = "";
+    let replacementClass = "";
+    let adminUnlocked = false;
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, function(char) {
+        return {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          "\"": "&quot;",
+          "'": "&#039;"
+        }[char];
+      });
+    }
+
+    function loadCompletedTasks() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey)) || {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function saveCompletedTasks() {
+      localStorage.setItem(storageKey, JSON.stringify(completedTasks));
+    }
+
+    function updateTeacherStatus() {
+      substituteTeacherName.value = substituteTeacher;
+      replacementClassName.value = replacementClass;
+      teacherStatus.textContent = substituteTeacher
+        ? "Nama guru ganti disimpan."
+        : "Isikan nama guru ganti dan nama kelas gantian.";
+    }
+
+    function formatDateTime(value) {
+      return new Date(value).toLocaleString("ms-MY", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      });
+    }
+
+    function initDashboard() {
+      const uniqueDays = new Set(tasks.map(task => task.day)).size;
+      const uniqueClasses = new Set(tasks.map(task => task.className)).size;
+      const scienceCount = tasks.filter(task => task.subject === "Sains").length;
+      const psvCount = tasks.filter(task => task.subject === "PSV").length;
+      document.getElementById("totalDays").textContent = uniqueDays;
+      document.getElementById("totalClasses").textContent = uniqueClasses;
+      document.getElementById("totalScience").textContent = scienceCount;
+      document.getElementById("totalPsv").textContent = psvCount;
+    }
+
+    function getFilteredTasks() {
+      if (!substituteTeacher) return [];
+      if (!replacementClass) return [];
+      return tasks.filter(task => {
+        const matchesSearch = task.className.toLowerCase().includes(replacementClass.toLowerCase());
+        const isCompleted = Boolean(completedTasks[task.id]);
+        return matchesSearch && !isCompleted;
+      });
+    }
+
+    function summarize(text) {
+      return text.length > 135 ? `${text.slice(0, 132)}...` : text;
+    }
+
+    function getTaskInstructionText(task) {
+      if (task.subject !== "Sains") return task.task;
+      return "Murid perlu menyalin semua soalan objektif aneka pilihan dalam buku tulis Sains masing-masing dan menjawab soalan tersebut dengan lengkap.";
+    }
+
+    function getTaskInstructions(task) {
+      if (task.subject !== "Sains") return task.instructions;
+      return [
+        "Salin semua soalan objektif A-D dalam buku tulis Sains.",
+        "Jawab setiap soalan dengan menulis pilihan jawapan yang betul.",
+        "Pastikan nama, kelas dan tarikh ditulis pada buku tulis.",
+        "Semak semula jawapan sebelum buku dikumpulkan."
+      ];
+    }
+
+    function getSubstituteNote(task) {
+      if (task.subject !== "Sains") return task.substituteNote;
+      return "Guru ganti boleh membantu murid memahami arahan dan membimbing murid semasa menjawab soalan tersebut.";
+    }
+
+    function getWorksheetTopic(task) {
+      if (task.subject === "PSV") {
+        if (task.id === 9) return "Tema Alam Sekitar Sekolah Saya";
+        if (task.id === 18) return "Corak Garisan dan Bentuk";
+        return "Tema Hari Peperiksaan Saya";
+      }
+
+      const topicByTask = {
+        1: "Topik 1: Kemahiran Saintifik",
+        2: "Topik 2: Manusia",
+        3: "Topik 1: Kemahiran Saintifik",
+        4: "Topik 3: Haiwan",
+        5: "Topik 3: Haiwan",
+        6: "Topik 2: Manusia",
+        7: "Topik 1: Kemahiran Saintifik",
+        8: "Topik 3: Haiwan",
+        10: "Topik 2: Manusia",
+        11: "Topik 1: Kemahiran Saintifik",
+        12: "Topik 2: Manusia",
+        13: "Topik 1: Kemahiran Saintifik",
+        14: "Topik 3: Haiwan",
+        15: "Topik 1: Kemahiran Saintifik",
+        16: "Topik 2: Manusia",
+        17: "Topik 2: Manusia",
+        19: "Topik 3: Haiwan",
+        21: "Topik 2: Manusia"
+      };
+
+      return topicByTask[task.id] || task.focus;
+    }
+
+    function getScienceQuestions(year, topic) {
+      const scienceBanks = {
+        "1|Topik 1: Kemahiran Saintifik": [
+          {prompt: "Apakah deria yang digunakan untuk melihat warna objek?", choices: ["mata", "hidung", "telinga", "lidah"] },
+          {prompt: "Apakah alat yang sesuai untuk melihat objek kecil?", choices: ["kanta pembesar", "pembaris", "jam", "pemadam"] },
+          {prompt: "Pemerhatian yang baik perlu dibuat dengan cara _____.", choices: ["teliti", "tergesa-gesa", "meneka sahaja", "menyalin"] },
+        ],
+        "1|Topik 2: Manusia": [
+          {prompt: "Bahagian badan yang digunakan untuk berjalan ialah _____.", choices: ["kaki", "mata", "hidung", "mulut"] },
+          {prompt: "Kita menggunakan tangan untuk _____.", choices: ["memegang", "menghidu", "mendengar", "melihat"] },
+          {prompt: "Organ deria yang digunakan untuk merasa makanan ialah _____.", choices: ["lidah", "mata", "telinga", "rambut"] },
+        ],
+        "1|Topik 3: Haiwan": [
+          {prompt: "Antara berikut, yang manakah haiwan?", choices: ["kucing", "kerusi", "pensel", "batu"] },
+          {prompt: "Haiwan yang boleh terbang ialah _____.", choices: ["burung", "ikan", "kambing", "kucing"] },
+          {prompt: "Ikan hidup di _____.", choices: ["air", "pokok", "awan", "meja"] },
+        ],
+        "2|Topik 1: Kemahiran Saintifik": [
+          {prompt: "Maklumat yang diperoleh melalui deria disebut _____.", choices: ["pemerhatian", "tekaan", "cerita", "lukisan"] },
+          {prompt: "Alat yang sesuai untuk mengukur panjang meja ialah _____.", choices: ["pembaris", "sudu", "pemadam", "wisel"] },
+          {prompt: "Apabila membuat pemerhatian, murid perlu mencatat maklumat dengan _____.", choices: ["tepat", "lambat", "rahsia", "bising"] },
+        ],
+        "2|Topik 2: Manusia": [
+          {prompt: "Manusia memerlukan udara untuk _____.", choices: ["bernafas", "menulis", "melompat", "melukis"] },
+          {prompt: "Makanan yang seimbang membantu badan menjadi _____.", choices: ["sihat", "patah", "gelap", "berkarat"] },
+          {prompt: "Air diperlukan oleh manusia supaya badan tidak _____.", choices: ["kekurangan air", "berbunyi", "terbang", "membeku"] },
+        ],
+        "2|Topik 3: Haiwan": [
+          {prompt: "Haiwan yang bertelur ialah _____.", choices: ["ayam", "kucing", "lembu", "kambing"] },
+          {prompt: "Kucing membiak dengan cara _____.", choices: ["melahirkan anak", "bertelur", "bercambah", "berakar"] },
+          {prompt: "Anak ayam menetas daripada _____.", choices: ["telur", "daun", "batu", "buah"] },
+        ],
+        "3|Topik 1: Kemahiran Saintifik": [
+          {prompt: "Pemerhatian boleh dibuat menggunakan _____.", choices: ["deria", "mimpi", "tekaan", "suara sahaja"] },
+          {prompt: "Warna objek diperhatikan menggunakan _____.", choices: ["mata", "hidung", "telinga", "lidah"] },
+          {prompt: "Bau makanan diperhatikan menggunakan _____.", choices: ["hidung", "kaki", "tangan", "mata"] },
+          {prompt: "Tekstur kasar atau licin dikenal pasti melalui deria _____.", choices: ["sentuhan", "pendengaran", "penglihatan sahaja", "bau"] },
+          {prompt: "Alat yang sesuai untuk melihat objek kecil ialah _____.", choices: ["kanta pembesar", "wisel", "jam", "gelas"] },
+          {prompt: "Pemerhatian yang baik perlu dicatat dengan _____.", choices: ["tepat", "rawak", "rahsia", "lewat"] },
+        ],
+        "3|Topik 2: Manusia": [
+          {prompt: "Organ deria untuk melihat ialah _____.", choices: ["mata", "telinga", "hidung", "kulit"] },
+          {prompt: "Kita menghidu bau menggunakan _____.", choices: ["hidung", "lidah", "mata", "tangan"] },
+          {prompt: "Kulit membantu kita mengesan _____.", choices: ["sentuhan", "bunyi", "warna sahaja", "bau sahaja"] },
+          {prompt: "Makanan seimbang penting untuk _____.", choices: ["kesihatan badan", "membesarkan beg", "menghilangkan udara", "menukar warna mata"] },
+          {prompt: "Amalan membasuh tangan membantu mencegah _____.", choices: ["penyakit", "cahaya", "hujan", "bunyi"] },
+          {prompt: "Gigi perlu digosok untuk menjaga _____.", choices: ["kebersihan mulut", "warna baju", "bunyi suara", "bentuk pensel"] },
+        ],
+        "3|Topik 3: Haiwan": [
+          {prompt: "Burung mempunyai _____.", choices: ["sayap", "sisik ikan", "cengkerang", "sirip"] },
+          {prompt: "Ikan bergerak di dalam air menggunakan _____.", choices: ["sirip", "kaki", "sayap", "paruh"] },
+          {prompt: "Badan kucing dilitupi _____.", choices: ["bulu", "sisik", "daun", "cengkerang"] },
+          {prompt: "Paruh ialah ciri luaran bagi _____.", choices: ["burung", "ikan", "cacing", "kucing"] },
+          {prompt: "Cengkerang melindungi badan _____.", choices: ["siput", "ayam", "harimau", "burung"] },
+          {prompt: "Haiwan menggunakan ciri luaran untuk membantu mereka _____.", choices: ["hidup", "menjadi batu", "berkarat", "menjadi tumbuhan"] },
+        ]
+      };
+
+      const key = `${year}|${topic}`;
+      return scienceBanks[key] || scienceBanks[`${year}|Topik 1: Kemahiran Saintifik`] || [];
+    }
+
+    function getPsvQuestions(task, topic) {
+      return [
+        {prompt: "Bidang seni visual yang melibatkan aktiviti melukis dan mewarna ialah _____.", choices: ["menggambar", "membina ayat", "menyanyi", "mengira"] },
+        {prompt: "Menghasilkan corak berulang menggunakan garisan dan bentuk termasuk dalam bidang _____.", choices: ["membuat corak dan rekaan", "membaca", "olahraga", "muzik"] },
+        {prompt: "Aktiviti menghasilkan model atau binaan 3D termasuk dalam bidang _____.", choices: ["membentuk dan membuat binaan", "menulis karangan", "membaca petikan", "menghafal sifir"] },
+        {prompt: "Anyaman, batik atau wau merupakan contoh bidang _____.", choices: ["kraf tradisional", "sains bahan", "pendidikan muzik", "bahasa"] },
+        {prompt: "Tema karya PSV hari ini paling sesuai dikaitkan dengan _____.", choices: [topic.replace("Tema ", ""), "latihan matematik", "ujian lisan", "aktiviti sukan"] },
+      ];
+    }
+
+    function getWorksheet(task) {
+      const topic = getWorksheetTopic(task);
+      const commonHeader = {
+        title: `Lembaran Kerja ${task.subject} Tahun ${task.year} - Ujian Topikal`,
+        meta: `${task.className} | ${task.day}, ${task.date} | ${task.time}`,
+        topic
+      };
+      const baseItems = task.subject === "PSV" ? getPsvQuestions(task, topic) : getScienceQuestions(task.year, topic);
+      const objectiveItems = makeObjectiveOnly(task, topic, baseItems);
+
+      return { ...commonHeader, items: objectiveItems };
+    }
+
+    function makeObjectiveOnly(task, topic, items) {
+      const targetCount = task.year === "3" ? 10 : 5;
+      const objectiveItems = items.filter(item => item.choices && item.choices.length === 4);
+      const extras = getObjectiveExtras(task, topic);
+      for (const extra of extras) {
+        if (objectiveItems.length >= targetCount) break;
+        objectiveItems.push(extra);
+      }
+      return objectiveItems.slice(0, targetCount);
+    }
+
+    function getObjectiveExtras(task, topic) {
+      const scienceExtras = {
+        "1|Topik 1: Kemahiran Saintifik": [
+          {prompt: "Deria bau digunakan untuk mengenal pasti _____.", choices: ["bau", "warna", "bunyi", "bentuk"] },
+          {prompt: "Deria sentuhan digunakan untuk merasa objek yang _____.", choices: ["kasar", "berbunyi", "berbau", "berwarna"] }
+        ],
+        "1|Topik 2: Manusia": [
+          {prompt: "Kita mendengar bunyi menggunakan _____.", choices: ["telinga", "mata", "lutut", "rambut"] },
+          {prompt: "Anggota badan yang digunakan untuk menggigit makanan ialah _____.", choices: ["gigi", "mata", "kaki", "telinga"] }
+        ],
+        "1|Topik 3: Haiwan": [
+          {prompt: "Haiwan yang mempunyai sayap ialah _____.", choices: ["burung", "ikan", "ular", "kucing"] },
+          {prompt: "Kucing bergerak menggunakan _____.", choices: ["kaki", "sirip", "akar", "daun"] }
+        ],
+        "2|Topik 1: Kemahiran Saintifik": [
+          {prompt: "Kita menggunakan hidung untuk memerhati _____.", choices: ["bau", "warna", "saiz", "panjang"] },
+          {prompt: "Maklumat pemerhatian perlu ditulis dalam _____.", choices: ["catatan", "lagu", "mimpi", "permainan"] }
+        ],
+        "2|Topik 2: Manusia": [
+          {prompt: "Tidur yang cukup membantu badan menjadi _____.", choices: ["segar", "berkarat", "berbunyi", "kecil"] },
+          {prompt: "Kebersihan diri boleh dijaga dengan _____.", choices: ["mandi", "tidak mencuci tangan", "membuang makanan", "bermain lumpur"] }
+        ],
+        "2|Topik 3: Haiwan": [
+          {prompt: "Itik membiak dengan cara _____.", choices: ["bertelur", "melahirkan anak", "bercambah", "berakar"] },
+          {prompt: "Arnab membiak dengan cara _____.", choices: ["melahirkan anak", "bertelur", "berbiji", "bertunas"] }
+        ],
+        "3|Topik 1: Kemahiran Saintifik": [
+          {prompt: "Maklumat pemerhatian yang tepat perlu direkod dalam _____.", choices: ["jadual", "cerita dongeng", "lukisan bebas", "lagu"] },
+          {prompt: "Deria rasa digunakan untuk mengenal pasti _____.", choices: ["rasa makanan", "bunyi loceng", "warna daun", "saiz meja"] },
+          {prompt: "Objek yang licin dapat dikenal pasti melalui deria _____.", choices: ["sentuhan", "pendengaran", "penglihatan sahaja", "bau"] },
+          {prompt: "Pemerhatian menggunakan lebih daripada satu deria menjadikan maklumat lebih _____.", choices: ["lengkap", "kabur", "rahsia", "lambat"] }
+        ],
+        "3|Topik 2: Manusia": [
+          {prompt: "Telinga ialah organ deria untuk _____.", choices: ["mendengar", "melihat", "mengunyah", "berjalan"] },
+          {prompt: "Kulit boleh mengesan objek yang _____.", choices: ["panas", "berbunyi kuat", "berbau harum", "berwarna biru sahaja"] },
+          {prompt: "Kita perlu mencuci tangan sebelum makan untuk mengelakkan _____.", choices: ["kuman", "cahaya", "angin", "warna"] },
+          {prompt: "Makanan berkhasiat membantu manusia mendapat _____.", choices: ["tenaga", "karat", "bunyi", "sayap"] }
+        ],
+        "3|Topik 3: Haiwan": [
+          {prompt: "Sisik biasanya terdapat pada badan _____.", choices: ["ikan", "kucing", "ayam", "rama-rama"] },
+          {prompt: "Rama-rama bergerak menggunakan _____.", choices: ["sayap", "sirip", "cengkerang", "paruh"] },
+          {prompt: "Kaki membantu haiwan untuk _____.", choices: ["bergerak", "berfotosintesis", "berkarat", "menjadi batu"] },
+          {prompt: "Bulu pada badan haiwan boleh membantu haiwan _____.", choices: ["melindungi badan", "menjadi tumbuhan", "menukar sirip", "menghasilkan batu"] }
+        ]
+      };
+
+      if (task.subject === "Sains") {
+        return scienceExtras[`${task.year}|${topic}`] || [];
+      }
+
+      const psvCommon = [
+        {prompt: "Aktiviti melakar objek utama sebelum mewarna berkaitan bidang _____.", choices: ["menggambar", "membaca", "mengira", "menyanyi"] },
+        {prompt: "Susunan motif yang berulang-ulang dikenali sebagai _____.", choices: ["corak", "bunyi", "nombor", "ayat"] },
+        {prompt: "Bahan seperti kotak, tanah liat atau kertas boleh digunakan untuk aktiviti _____.", choices: ["membentuk dan membuat binaan", "menyalin nota", "menyusun buku", "membaca kuat"] },
+        {prompt: "Karya seperti wau dan anyaman sesuai dikaitkan dengan _____.", choices: ["kraf tradisional", "sukan", "matematik", "sains"] },
+        {prompt: "Empat bidang seni visual ialah menggambar, membuat corak dan rekaan, membentuk dan membuat binaan serta _____.", choices: ["kraf tradisional", "tatabahasa", "pecahan", "nyanyian"] }
+      ];
+      return psvCommon;
+    }
+
+    function worksheetText(task) {
+      const worksheet = getWorksheet(task);
+      return [
+        worksheet.title,
+        worksheet.meta,
+        topicLabel(worksheet.topic),
+        `Nama: ____________________    Tarikh: ${task.date}`,
+        "",
+        ...worksheet.items.map((item, index) => formatQuestionText(item, index)),
+        "",
+        `Hasil kerja: ${task.deliverable}`
+      ].join("\n");
+    }
+
+    function getQuestionPrompt(item) {
+      if (typeof item === "string") return item;
+      return item.prompt;
+    }
+
+    function topicLabel(topic) {
+      return topic.startsWith("Topik ") ? topic : `Topik: ${topic}`;
+    }
+
+    function formatQuestionText(item, index) {
+      if (typeof item === "string") return `${index + 1}. ${item}`;
+      const labels = ["A", "B", "C", "D"];
+      const choices = item.choices ? item.choices.map((choice, choiceIndex) => `   ${labels[choiceIndex]}. ${choice}`).join("\n") : "";
+      return [`${index + 1}. ${item.prompt}`, choices].filter(Boolean).join("\n");
+    }
+
+    function renderExamQuestion(item, index) {
+      const labels = ["A", "B", "C", "D"];
+      const choices = typeof item === "string" || !item.choices ? "" : `
+        <div class="choice-list">
+          ${item.choices.map((choice, choiceIndex) => `
+            <div class="choice-item">
+              <span class="choice-label">${labels[choiceIndex]}.</span>
+              <span>${escapeHtml(choice)}</span>
+            </div>
+          `).join("")}
+        </div>
+      `;
+      return `
+        <li class="exam-question">
+          <span class="question-no">${index + 1}</span>
+          <div>
+            <p class="question-text">${escapeHtml(getQuestionPrompt(item))}</p>
+            ${choices}
+            <span class="answer-line" aria-hidden="true"></span>
+          </div>
+        </li>
+      `;
+    }
+
+    function renderWorksheet(task) {
+      const worksheet = getWorksheet(task);
+      return `
+        <div class="worksheet-box">
+          <div class="worksheet-head">
+            <p class="worksheet-title">${escapeHtml(worksheet.title)}</p>
+          </div>
+          <div class="exam-sheet" role="img" aria-label="Gambar helaian peperiksaan ${escapeHtml(task.subject)} ${escapeHtml(task.className)}">
+            <div class="exam-content">
+              <div class="exam-header">
+                <div>
+                  <p class="exam-school">SEKOLAH KEBANGSAAN SUNGAI TIRAM</p>
+                  <p class="exam-title">${escapeHtml(worksheet.title)}</p>
+                  <p class="exam-meta">${escapeHtml(worksheet.meta)}</p>
+                  <p class="exam-meta">${escapeHtml(topicLabel(worksheet.topic))}</p>
+                </div>
+                <div class="exam-marks">Markah<br>/ ${worksheet.items.length}</div>
+              </div>
+              <div class="exam-fields">
+                <span class="exam-field">Nama:</span>
+                <span class="exam-field">Kelas: ${escapeHtml(task.className)}</span>
+                <span class="exam-field">Tarikh: ${escapeHtml(task.date)}</span>
+              </div>
+              <ol class="exam-questions">
+                ${worksheet.items.map(renderExamQuestion).join("")}
+              </ol>
+              <p class="exam-footer-note">Semak jawapan sebelum dihantar kepada guru ganti.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function copyWorksheet(taskId) {
+      const task = tasks.find(item => item.id === Number(taskId));
+      if (!task) return;
+      const text = worksheetText(task);
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        const temp = document.createElement("textarea");
+        temp.value = text;
+        temp.setAttribute("readonly", "");
+        temp.style.position = "fixed";
+        temp.style.opacity = "0";
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+      }
+      copyToast.classList.add("show");
+      window.setTimeout(() => copyToast.classList.remove("show"), 1700);
+    }
+
+    function completeTask(taskId) {
+      if (!substituteTeacher) return;
+      const task = tasks.find(item => item.id === Number(taskId));
+      if (!task) return;
+      completedTasks[task.id] = {
+        taskId: task.id,
+        teacherName: substituteTeacher,
+        completedAt: new Date().toISOString(),
+        className: task.className,
+        subject: task.subject,
+        day: task.day,
+        date: task.date,
+        time: task.time,
+        topic: getWorksheetTopic(task),
+        focus: task.focus
+      };
+      saveCompletedTasks();
+      renderTasks();
+      renderAdminCompleted();
+    }
+
+    function renderAdminCompleted() {
+      if (!adminUnlocked) {
+        completedList.innerHTML = "";
+        return;
+      }
+
+      const completed = Object.values(completedTasks)
+        .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+
+      adminStatus.textContent = completed.length
+        ? `${completed.length} tugasan telah ditanda selesai.`
+        : "Belum ada tugasan yang ditanda selesai.";
+
+      completedList.innerHTML = completed.map(item => `
+        <article class="completed-item">
+          <strong>${escapeHtml(item.className)} - ${escapeHtml(item.subject)} (${escapeHtml(item.day)}, ${escapeHtml(item.date)} | ${escapeHtml(item.time)})</strong>
+          <p>Topik/Fokus: ${escapeHtml(item.topic || item.focus)}</p>
+          <p>Guru ganti: ${escapeHtml(item.teacherName)}</p>
+          <p>Ditanda selesai: ${escapeHtml(formatDateTime(item.completedAt))}</p>
+          <button class="action-btn delete-btn" type="button" data-delete-completed-id="${item.taskId}">Padam</button>
+        </article>
+      `).join("");
+    }
+
+    function deleteCompletedTask(taskId) {
+      delete completedTasks[taskId];
+      saveCompletedTasks();
+      renderAdminCompleted();
+      renderTasks();
+    }
+
+    function renderTasks() {
+      const filteredTasks = getFilteredTasks();
+      taskGrid.innerHTML = filteredTasks.map(task => {
+        const subjectClass = task.subject === "PSV" ? "psv" : "sains";
+        const tickButton = substituteTeacher
+          ? `<button class="action-btn tick-btn" type="button" data-complete-id="${task.id}">Tick Selesai</button>`
+          : "";
+        return `
+          <article class="task-card ${subjectClass}">
+            <div class="task-topline">
+              <span class="subject-badge">${escapeHtml(task.subject)}</span>
+              <span class="date-badge">${escapeHtml(task.day)}, ${escapeHtml(task.date)}</span>
+            </div>
+            <div class="task-title">
+              <h3>${escapeHtml(task.className)}</h3>
+              <span class="time">${escapeHtml(task.time)}</span>
+            </div>
+            <p class="focus">${escapeHtml(task.focus)}</p>
+            <p class="task-summary">${escapeHtml(summarize(getTaskInstructionText(task)))}</p>
+            <p class="deliverable">Guru ganti: ${escapeHtml(substituteTeacher)}</p>
+            ${renderWorksheet(task)}
+            <div class="task-footer">
+              <p class="deliverable">Hasil kerja: ${escapeHtml(task.deliverable)}</p>
+              <div class="task-actions">
+                <button class="detail-btn" type="button" data-task-id="${task.id}">Lihat Perincian</button>
+                ${tickButton}
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+      if (!substituteTeacher) {
+        taskCount.textContent = "Simpan nama guru ganti terlebih dahulu";
+        emptyState.textContent = "Isikan nama guru ganti, nama kelas gantian dan tekan Simpan sebelum memilih tugasan.";
+      } else if (!replacementClass) {
+        taskCount.textContent = "Simpan nama kelas gantian terlebih dahulu";
+        emptyState.textContent = "Isikan nama kelas gantian supaya kad tugasan kelas tersebut dipaparkan.";
+      } else {
+        taskCount.textContent = `${filteredTasks.length} tugasan belum selesai untuk ${replacementClass}`;
+        emptyState.textContent = "Tiada tugasan belum selesai untuk kelas gantian ini.";
+      }
+      emptyState.classList.toggle("show", filteredTasks.length === 0);
+    }
+
+    function renderAll() {
+      renderTasks();
+    }
+
+    function detailList(items) {
+      return items.map(item => `
+        <div class="detail-item">
+          <strong>${escapeHtml(item.label)}</strong>
+          <span>${escapeHtml(item.value)}</span>
+        </div>
+      `).join("");
+    }
+
+    function openModal(taskId) {
+      const task = tasks.find(item => item.id === Number(taskId));
+      if (!task) return;
+      modalTitle.textContent = `Perincian Tugasan ${task.className}`;
+      modalBody.innerHTML = `
+        <div class="detail-list">
+          ${detailList([
+            { label: "Kelas", value: task.className },
+            { label: "Subjek", value: task.subject },
+            { label: "Hari / Tarikh", value: `${task.day}, ${task.date}` },
+            { label: "Masa", value: task.time }
+          ])}
+        </div>
+        <div class="detail-block">
+          <h3>Objektif Tugasan</h3>
+          <p>${escapeHtml(task.objective)}</p>
+        </div>
+        <div class="detail-block">
+          <h3>Arahan Guru</h3>
+          <p>${escapeHtml(getTaskInstructionText(task))}</p>
+          <ul>${getTaskInstructions(task).map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
+        <div class="detail-block">
+          <h3>Lembaran Kerja Untuk Disalin Murid</h3>
+          ${renderWorksheet(task)}
+        </div>
+        <div class="detail-block">
+          <h3>Langkah Pelaksanaan</h3>
+          <ol>${task.steps.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ol>
+        </div>
+        <div class="detail-block">
+          <h3>Bahan Diperlukan</h3>
+          <p>${escapeHtml(task.materials)}</p>
+        </div>
+        <div class="detail-block">
+          <h3>Hasil Kerja Murid</h3>
+          <p>${escapeHtml(task.deliverable)}</p>
+        </div>
+        <div class="detail-block">
+          <h3>Catatan Untuk Guru Ganti</h3>
+          <p>${escapeHtml(getSubstituteNote(task))}</p>
+        </div>
+      `;
+      modalBackdrop.classList.add("show");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+      modalBackdrop.classList.remove("show");
+      document.body.style.overflow = "";
+    }
+
+    function printTitle(mode, value) {
+      if (mode === "day") return `Tugasan Mengikut Hari: ${value}`;
+      if (mode === "class") return `Tugasan Mengikut Kelas: ${value}`;
+      return "Semua Tugasan";
+    }
+
+    function buildPrintDocument(printTasks, mode, value) {
+      const rows = printTasks.map((task, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${escapeHtml(task.day)}<br>${escapeHtml(task.date)}</td>
+          <td>${escapeHtml(task.time)}</td>
+          <td>${escapeHtml(task.className)}</td>
+          <td>${escapeHtml(task.subject)}</td>
+          <td>${escapeHtml(task.focus)}</td>
+          <td>${escapeHtml(getTaskInstructionText(task))}<br><strong>Arahan:</strong> ${escapeHtml(getTaskInstructions(task).join("; "))}</td>
+          <td>${escapeHtml(task.materials)}</td>
+          <td>${escapeHtml(task.deliverable)}</td>
+          <td>${escapeHtml(worksheetText(task)).replace(/\n/g, "<br>")}</td>
+          <td>${escapeHtml(getSubstituteNote(task))}</td>
+        </tr>
+      `).join("");
+
+      printArea.innerHTML = `
+        <div class="print-doc">
+          <div class="print-head">
+            <img src="${badgeUrl}" alt="Lencana sekolah">
+            <div>
+              <h1>SEKOLAH KEBANGSAAN SUNGAI TIRAM</h1>
+              <h2>SISTEM TUGASAN MURID SEMASA GURU BERTUGAS LUAR STESEN</h2>
+              <p>${escapeHtml(printTitle(mode, value))}</p>
+            </div>
+          </div>
+          <div class="print-meta">
+            <p><strong>Nama Guru:</strong> MUHAMMAD HANIF BIN ISMAIL</p>
+            <p><strong>Tempoh Tugasan:</strong> Isnin hingga Jumaat</p>
+            <p><strong>Tarikh:</strong> 8 Jun 2026 hingga 12 Jun 2026</p>
+            <p><strong>Jumlah Tugasan Dicetak:</strong> ${printTasks.length}</p>
+          </div>
+          <div class="print-note">
+            Sepanjang guru bertugas di luar stesen, murid perlu menyiapkan tugasan yang diberikan mengikut jadual. Guru ganti boleh memantau kelas berdasarkan senarai tugasan ini. Semua hasil kerja perlu dihantar kepada guru mata pelajaran selepas guru kembali bertugas.
+          </div>
+          <table class="print-table">
+            <thead>
+              <tr>
+                <th>Bil.</th>
+                <th>Hari / Tarikh</th>
+                <th>Masa</th>
+                <th>Kelas</th>
+                <th>Subjek</th>
+                <th>Fokus</th>
+                <th>Arahan Tugasan</th>
+                <th>Bahan</th>
+                <th>Hasil Kerja</th>
+                <th>Lembaran Kerja</th>
+                <th>Catatan Guru Ganti</th>
+              </tr>
+            </thead>
+            <tbody>${rows || `<tr><td colspan="11">Tiada tugasan untuk cetakan ini.</td></tr>`}</tbody>
+          </table>
+          <div class="signatures">
+            <div class="signature-box">
+              <strong>Tandatangan Guru</strong><br>
+              Nama: MUHAMMAD HANIF BIN ISMAIL<br>
+              Tarikh:
+            </div>
+            <div class="signature-box">
+              <strong>Pengesahan Pentadbir</strong><br>
+              Nama / Jawatan:<br>
+              Tarikh:
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function startPrint(printTasks, mode, value) {
+      buildPrintDocument(printTasks, mode, value);
+      window.print();
+    }
+
+    taskGrid.addEventListener("click", event => {
+      const completeButton = event.target.closest("[data-complete-id]");
+      if (completeButton) {
+        completeTask(completeButton.dataset.completeId);
+        return;
+      }
+      const button = event.target.closest("[data-task-id]");
+      if (button) openModal(button.dataset.taskId);
+    });
+
+    saveTeacherBtn.addEventListener("click", () => {
+      substituteTeacher = substituteTeacherName.value.trim();
+      replacementClass = replacementClassName.value.trim();
+      updateTeacherStatus();
+      renderTasks();
+    });
+
+    substituteTeacherName.addEventListener("input", () => {
+      if (!substituteTeacherName.value.trim()) {
+        substituteTeacher = "";
+        updateTeacherStatus();
+        renderTasks();
+      }
+    });
+
+    replacementClassName.addEventListener("input", () => {
+      if (!replacementClassName.value.trim()) {
+        replacementClass = "";
+        updateTeacherStatus();
+        renderTasks();
+      }
+    });
+
+    adminLoginBtn.addEventListener("click", () => {
+      if (adminPassword.value === adminPasswordValue) {
+        adminUnlocked = true;
+        adminPassword.value = "";
+        adminStatus.textContent = "Admin dibuka.";
+        renderAdminCompleted();
+      } else {
+        adminUnlocked = false;
+        completedList.innerHTML = "";
+        adminStatus.textContent = "Kata laluan tidak tepat.";
+      }
+    });
+
+    completedList.addEventListener("click", event => {
+      const deleteButton = event.target.closest("[data-delete-completed-id]");
+      if (deleteButton) deleteCompletedTask(deleteButton.dataset.deleteCompletedId);
+    });
+
+    document.getElementById("closeModalBtn").addEventListener("click", closeModal);
+    modalBackdrop.addEventListener("click", event => {
+      if (event.target === modalBackdrop) closeModal();
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") closeModal();
+    });
+
+    initDashboard();
+    updateTeacherStatus();
+    renderAdminCompleted();
+    renderAll();
+  </script>
+</body>
+</html>
